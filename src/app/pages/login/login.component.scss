@@ -1,0 +1,128 @@
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #EFF6FF 0%, #F8FAFC 100%);
+}
+
+.login-box {
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(15, 23, 42, 0.12);
+  padding: 2.5rem 2rem;
+  width: min(100%, 420px);
+  text-align: center;
+}
+
+.login-logo {
+  display: block;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--brand);
+  letter-spacing: -2px;
+  margin-bottom: 0.25rem;
+  text-decoration: none;
+
+  span { color: var(--accent); }
+}
+
+.login-tagline {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.role-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.roles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.role-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+
+  &:hover { border-color: var(--brand); background: #EFF6FF; }
+  &.selected { border-color: var(--brand); background: #EFF6FF; }
+
+  .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; }
+  p { font-size: 0.75rem; color: var(--muted); }
+}
+
+.error-msg {
+  background: #FEF2F2;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.2s, transform 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--brand-d);
+    transform: translateY(-2px);
+  }
+  &:disabled { opacity: 0.7; cursor: not-allowed; }
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.terms {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 1rem;
+  a { color: var(--brand); }
+}
+
+.back-link {
+  display: block;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  transition: color 0.2s;
+  &:hover { color: var(--brand); }
+}

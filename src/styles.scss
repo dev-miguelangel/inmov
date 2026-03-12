@@ -1,0 +1,27 @@
+/* Global styles – inmov.cl */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brand:   #2563EB;
+  --brand-d: #1D4ED8;
+  --accent:  #F97316;
+  --bg:      #F8FAFC;
+  --surface: #FFFFFF;
+  --muted:   #64748B;
+  --text:    #0F172A;
+  --border:  #E2E8F0;
+  --radius:  14px;
+  --shadow:  0 4px 24px rgba(15,23,42,.08);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+button { font-family: inherit; cursor: pointer; }
+a { text-decoration: none; }
