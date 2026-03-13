@@ -14,6 +14,11 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
+If `src/environments/environment.ts` is not present, the build script generates it automatically from environment variables. For Vercel, define:
+
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY` (or `SUPABASE_ANON_KEY`)
+
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
