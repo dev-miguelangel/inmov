@@ -1,7 +1,23 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { SupabaseService } from '../../services/supabase.service';
+import { LandingFeedbackPayload, SupabaseService } from '../../services/supabase.service';
+
+type FeedbackFeatureId =
+  | 'type'
+  | 'location'
+  | 'specs'
+  | 'price'
+  | 'commonExpenses'
+  | 'availability'
+  | 'agent'
+  | 'tags';
+
+interface FeedbackFeature {
+  id: FeedbackFeatureId;
+  label: string;
+  hint: string;
+}
 
 @Component({
   selector: 'app-landing',
@@ -58,11 +74,122 @@ export class LandingComponent {
     { num: '98%',    label: 'Satisfacción' },
   ];
 
+  feedbackFeatures: FeedbackFeature[] = [
+    { id: 'type',           label: 'Tipo de publicación', hint: 'Arriendo o venta visible desde el inicio.' },
+    { id: 'location',       label: 'Ubicación',           hint: 'Comuna y sector para evaluar rápido.' },
+    { id: 'specs',          label: 'Dormitorios y baños', hint: 'Resumen corto con superficie incluida.' },
+    { id: 'price',          label: 'Precio',              hint: 'Valor principal destacado en la card.' },
+    { id: 'commonExpenses', label: 'Gastos comunes',      hint: 'Costo mensual adicional, si aplica.' },
+    { id: 'availability',   label: 'Disponibilidad',      hint: 'Desde cuándo se puede visitar o tomar.' },
+    { id: 'agent',          label: 'Quién publica',       hint: 'Nombre del agente o corredor.' },
+    { id: 'tags',           label: 'Características extra', hint: 'Beneficios como balcón o estacionamiento.' },
+  ];
+
+  defaultFeedbackFeatureIds = this.feedbackFeatures.map(feature => feature.id);
+  selectedFeedbackFeatures = signal<FeedbackFeatureId[]>([...this.defaultFeedbackFeatureIds]);
+  feedbackComments = signal('');
+  feedbackSubmitting = signal(false);
+  feedbackSubmitState = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  feedbackCard = {
+    photo: 'https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=900&q=80',
+    type: 'Arriendo',
+    title: 'Depto. familiar con vista despejada',
+    location: 'Providencia, Santiago',
+    specs: '3 dorm · 2 baños · 92 m²',
+    price: '$820.000/mes',
+    commonExpenses: 'Gastos comunes: $95.000',
+    availability: 'Disponible desde abril',
+    agent: 'P. Araya',
+    agentInitials: 'PA',
+    agentColor: '#2563EB',
+    tags: ['Balcón', 'Estacionamiento', 'Mascotas'],
+  };
+
   openModal(role?: 'cliente' | 'agente') {
     this.modalRole.set(role ?? null);
     this.modalOpen.set(true);
   }
   closeModal() { this.modalOpen.set(false); }
+
+  toggleFeedbackFeature(featureId: FeedbackFeatureId) {
+    const selected = this.selectedFeedbackFeatures();
+    this.feedbackSubmitState.set(null);
+
+    this.selectedFeedbackFeatures.set(
+      selected.includes(featureId)
+        ? selected.filter(id => id !== featureId)
+        : [...selected, featureId]
+    );
+  }
+
+  isFeedbackFeatureSelected(featureId: FeedbackFeatureId) {
+    return this.selectedFeedbackFeatures().includes(featureId);
+  }
+
+  updateFeedbackComments(value: string) {
+    this.feedbackComments.set(value);
+    this.feedbackSubmitState.set(null);
+  }
+
+  canSubmitFeedback() {
+    return !this.feedbackSubmitting() && this.selectedFeedbackFeatures().length > 0;
+  }
+
+  private buildVisibleFeedbackCard(): LandingFeedbackPayload['visibleCard'] {
+    const selected = new Set(this.selectedFeedbackFeatures());
+
+    return {
+      title: this.feedbackCard.title,
+      ...(selected.has('type') ? { type: this.feedbackCard.type } : {}),
+      ...(selected.has('location') ? { location: this.feedbackCard.location } : {}),
+      ...(selected.has('specs') ? { specs: this.feedbackCard.specs } : {}),
+      ...(selected.has('price') ? { price: this.feedbackCard.price } : {}),
+      ...(selected.has('commonExpenses') ? { commonExpenses: this.feedbackCard.commonExpenses } : {}),
+      ...(selected.has('availability') ? { availability: this.feedbackCard.availability } : {}),
+      ...(selected.has('agent')
+        ? {
+            agent: {
+              name: this.feedbackCard.agent,
+              initials: this.feedbackCard.agentInitials,
+            },
+          }
+        : {}),
+      ...(selected.has('tags') ? { tags: this.feedbackCard.tags } : {}),
+    };
+  }
+
+  submitFeedback() {
+    if (!this.canSubmitFeedback()) {
+      return;
+    }
+
+    this.feedbackSubmitting.set(true);
+    this.feedbackSubmitState.set(null);
+
+    this.supabase.submitLandingFeedback({
+      selectedFeatures: this.selectedFeedbackFeatures(),
+      comments: this.feedbackComments().trim() || null,
+      visibleCard: this.buildVisibleFeedbackCard(),
+    }).subscribe({
+      next: () => {
+        this.feedbackSubmitting.set(false);
+        this.feedbackComments.set('');
+        this.feedbackSubmitState.set({
+          type: 'success',
+          message: 'Gracias. Tu feedback fue enviado correctamente.',
+        });
+      },
+      error: (err) => {
+        this.feedbackSubmitting.set(false);
+        this.feedbackSubmitState.set({
+          type: 'error',
+          message: 'No se pudo enviar el feedback. Revisa la configuración de Supabase e inténtalo de nuevo.',
+        });
+        console.error(err);
+      },
+    });
+  }
 
   starsArray(n: number) { return Array(5).fill(0).map((_, i) => i < n ? '★' : '☆'); }
 }

@@ -4,6 +4,7 @@
   <ul>
     <li><a href="#how">¿Cómo funciona?</a></li>
     <li><a href="#properties">Propiedades</a></li>
+    <li><a href="#feedback">Sé parte de la idea</a></li>
     <li><a href="#agents">Agentes</a></li>
   </ul>
   <div class="nav-right">
@@ -143,6 +144,130 @@
   </div>
 </section>
 
+<!-- ── FEEDBACK LAB ── -->
+<section class="feedback-lab" id="feedback">
+  <div class="section-title">
+    <h2>Sé parte de la idea</h2>
+    <p>Ayúdanos a entender qué información hace más útil una publicación para ti</p>
+  </div>
+
+  <div class="feedback-layout">
+    <div class="feedback-panel">
+      <span class="feedback-kicker">Feedback de usabilidad</span>
+      <h3>¿Qué información es importante para ti?</h3>
+      <p class="feedback-copy">
+        Selecciona las características que te gustaría ver en una publicación ideal. La card de la derecha se irá
+        ajustando en tiempo real según tu selección.
+      </p>
+
+      <div class="feedback-options">
+        @for (feature of feedbackFeatures; track feature.id) {
+          <button
+            type="button"
+            class="feedback-option"
+            [class.selected]="isFeedbackFeatureSelected(feature.id)"
+            [disabled]="feedbackSubmitting()"
+            (click)="toggleFeedbackFeature(feature.id)"
+          >
+            <span class="feedback-option-copy">
+              <strong>{{ feature.label }}</strong>
+              <small>{{ feature.hint }}</small>
+            </span>
+            <span class="feedback-option-state">{{ isFeedbackFeatureSelected(feature.id) ? '✓' : '+' }}</span>
+          </button>
+        }
+      </div>
+
+      <label class="feedback-comments">
+        <span>¿Quieres contarnos algo más?</span>
+        <textarea
+          #feedbackCommentsField
+          [value]="feedbackComments()"
+          [disabled]="feedbackSubmitting()"
+          maxlength="2000"
+          placeholder="Escribe aquí tus comentarios sobre la usabilidad, la información visible o lo que te gustaría mejorar..."
+          (input)="updateFeedbackComments(feedbackCommentsField.value)"
+        ></textarea>
+      </label>
+
+      <button class="feedback-submit" type="button" [disabled]="!canSubmitFeedback()" (click)="submitFeedback()">
+        {{ feedbackSubmitting() ? 'Enviando feedback...' : 'Enviar feedback' }}
+      </button>
+
+      @if (feedbackSubmitState(); as submitState) {
+        <p class="feedback-status" [class.success]="submitState.type === 'success'" [class.error]="submitState.type === 'error'">
+          {{ submitState.message }}
+        </p>
+      }
+    </div>
+
+    <div class="feedback-preview">
+      <article class="feedback-card">
+        <div class="feedback-card-media">
+          <img [src]="feedbackCard.photo" [alt]="feedbackCard.title" loading="lazy" />
+        </div>
+
+        <div class="feedback-card-body">
+          @if (isFeedbackFeatureSelected('type')) {
+            <span class="badge badge-rent">{{ feedbackCard.type }}</span>
+          }
+
+          <h3>{{ feedbackCard.title }}</h3>
+
+          @if (isFeedbackFeatureSelected('location')) {
+            <p class="feedback-location">{{ feedbackCard.location }}</p>
+          }
+
+          @if (isFeedbackFeatureSelected('specs')) {
+            <p class="feedback-specs">{{ feedbackCard.specs }}</p>
+          }
+
+          @if (isFeedbackFeatureSelected('tags')) {
+            <div class="feedback-tags">
+              @for (tag of feedbackCard.tags; track tag) {
+                <span class="tag">{{ tag }}</span>
+              }
+            </div>
+          }
+
+          <div class="feedback-meta">
+            @if (isFeedbackFeatureSelected('price')) {
+              <div class="feedback-meta-item">
+                <span class="feedback-meta-label">Precio</span>
+                <strong>{{ feedbackCard.price }}</strong>
+              </div>
+            }
+
+            @if (isFeedbackFeatureSelected('commonExpenses')) {
+              <div class="feedback-meta-item">
+                <span class="feedback-meta-label">Costos</span>
+                <strong>{{ feedbackCard.commonExpenses }}</strong>
+              </div>
+            }
+
+            @if (isFeedbackFeatureSelected('availability')) {
+              <div class="feedback-meta-item">
+                <span class="feedback-meta-label">Disponibilidad</span>
+                <strong>{{ feedbackCard.availability }}</strong>
+              </div>
+            }
+          </div>
+
+          @if (isFeedbackFeatureSelected('agent')) {
+            <div class="feedback-agent">
+              <div class="avatar" [style.background]="feedbackCard.agentColor">{{ feedbackCard.agentInitials }}</div>
+              <div>
+                <span class="feedback-meta-label">Publicado por</span>
+                <strong>{{ feedbackCard.agent }}</strong>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
 <!-- ── PROFILES ── -->
 <section class="profiles" id="agents">
   <div class="section-title">
@@ -209,4 +334,3 @@
     </div>
   </div>
 }
-
