@@ -62,9 +62,19 @@ export class SupabaseService {
     return from(
       this.supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/login` },
+        options: { redirectTo: this.getAuthRedirectUrl() },
       }).then(() => {})
     );
+  }
+
+  private getAuthRedirectUrl() {
+    const configuredAppUrl = Reflect.get(environment, 'appUrl');
+
+    if (typeof configuredAppUrl === 'string' && configuredAppUrl.trim().length > 0) {
+      return new URL('/login', configuredAppUrl).toString();
+    }
+
+    return new URL('/login', window.location.origin).toString();
   }
 
   signOut(): Observable<void> {

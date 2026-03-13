@@ -18,6 +18,9 @@ If `src/environments/environment.ts` is not present, the build script generates 
 
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY` (or `SUPABASE_ANON_KEY`)
+- `APP_URL` (recommended) or rely on `VERCEL_PROJECT_PRODUCTION_URL`
+
+For Supabase Google auth, also make sure the production URL and `${APP_URL}/login` are allowed in Supabase Auth redirect settings.
 
 ## Running unit tests
 

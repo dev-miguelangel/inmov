@@ -19,11 +19,22 @@ function firstDefinedValue(...values) {
   return values.find(value => typeof value === 'string' && value.trim().length > 0)?.trim() ?? '';
 }
 
-function renderEnvironmentFile(production, supabaseUrl, supabaseKey) {
+function normalizeAppUrl(appUrl) {
+  if (!appUrl) {
+    return '';
+  }
+
+  const urlWithProtocol = /^https?:\/\//i.test(appUrl) ? appUrl : `https://${appUrl}`;
+
+  return urlWithProtocol.replace(/\/+$/, '');
+}
+
+function renderEnvironmentFile(production, supabaseUrl, supabaseKey, appUrl) {
   return `export const environment = {
   production: ${production},
   supabaseUrl: ${JSON.stringify(supabaseUrl)},
   supabaseKey: ${JSON.stringify(supabaseKey)},
+  appUrl: ${JSON.stringify(appUrl)},
 };
 `;
 }
@@ -63,6 +74,12 @@ async function ensureEnvironmentFiles() {
     process.env.NG_APP_SUPABASE_KEY,
     process.env.PUBLIC_SUPABASE_KEY,
   );
+  const appUrl = normalizeAppUrl(firstDefinedValue(
+    process.env.APP_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+    process.env.PUBLIC_APP_URL,
+  ));
 
   if (!supabaseUrl || !supabaseKey) {
     console.error(
@@ -72,8 +89,8 @@ async function ensureEnvironmentFiles() {
     process.exit(1);
   }
 
-  await writeFile(prodEnvFile, renderEnvironmentFile(true, supabaseUrl, supabaseKey));
-  await writeFile(devEnvFile, renderEnvironmentFile(false, supabaseUrl, supabaseKey));
+  await writeFile(prodEnvFile, renderEnvironmentFile(true, supabaseUrl, supabaseKey, appUrl));
+  await writeFile(devEnvFile, renderEnvironmentFile(false, supabaseUrl, supabaseKey, appUrl));
 
   console.log('Generated Angular environment files from Supabase environment variables.');
 }
