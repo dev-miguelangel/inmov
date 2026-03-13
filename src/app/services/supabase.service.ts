@@ -4,6 +4,12 @@ import { createClient, Session, SupabaseClient, User } from '@supabase/supabase-
 import { from, Observable, ReplaySubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export interface LandingFeedbackPayload {
+  selectedFeatures: string[];
+  comments: string | null;
+  visibleCard: Record<string, unknown>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
   private supabase: SupabaseClient;
@@ -64,6 +70,28 @@ export class SupabaseService {
   signOut(): Observable<void> {
     return from(
       this.supabase.auth.signOut().then(() => {})
+    );
+  }
+
+  submitLandingFeedback(payload: LandingFeedbackPayload): Observable<void> {
+    const user = this.currentUser;
+
+    return from(
+      this.supabase
+        .from('landing_feedback')
+        .insert({
+          page: 'landing',
+          user_id: user?.id ?? null,
+          user_email: user?.email ?? null,
+          selected_features: payload.selectedFeatures,
+          comments: payload.comments,
+          preview_snapshot: payload.visibleCard,
+        })
+        .then(({ error }) => {
+          if (error) {
+            throw error;
+          }
+        })
     );
   }
 
